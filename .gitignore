@@ -1,7 +1,6 @@
 *py[co]
 
 #test
-*.sh
 *test*
 *backup*
 
