@@ -44,7 +44,7 @@ class LineAPI(object):
     CERT_FILE = ".line.crt"
 
     ip          = "127.0.0.1"
-    version     = "5.1.2"
+    version     = "4.9.0"
     com_name    = ""
     revision    = 0
     certificate = ""
