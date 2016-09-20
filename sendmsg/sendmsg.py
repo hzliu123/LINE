@@ -15,8 +15,9 @@ import sys
 import os
 from line import LineClient, LineGroup, LineContact
 
-if len(sys.argv) < 2:
-    print("usage: sendmsg.py <message>")
+arglen = len(sys.argv)
+if arglen < 3:
+    print("usage: sendmsg.py [text 'message'| image img.jpg]+")
     sys.exit(1)
 
 AUTHFILE = '.auth'
@@ -51,5 +52,15 @@ if loginfail:
     sys.exit(2)
 
 x=client.contacts[1]
-x.sendMessage(sys.argv[1])
+
+for i in xrange(1, arglen, 2):
+    msgtype = sys.argv[i]
+    if msgtype == 'text':
+        x.sendMessage(sys.argv[i+1])
+    elif msgtype == 'image':
+        x.sendImage(sys.argv[i+1])
+    else:
+        print("error argument!")
+        sys.exit(3)
+
 x.getRecentMessages(count=10)
