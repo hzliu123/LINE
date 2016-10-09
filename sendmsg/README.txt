@@ -6,7 +6,7 @@ How to use this:
    modify user credientials in LINE/sendmsg/sendmsg.py
 
 2. Command syntax:
-   sendmsg.sh "Hello world!"
+   sendmsg.sh friend_name text "Hello world!" image image.jpg
 
    Since this is only for demo, target user is fixed. Change it 
    from the source code if needed.

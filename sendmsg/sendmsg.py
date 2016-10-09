@@ -10,23 +10,30 @@
 # LINE servers. That's is too much work for our GTC demo.
 #
 
-import IPython
 import sys
 import os
 from line import LineClient, LineGroup, LineContact
 
 arglen = len(sys.argv)
 if arglen < 3:
-    print("usage: sendmsg.py [text 'message'| image img.jpg]+")
+    print("usage: sendmsg.py friend_name [text 'message'| image img.jpg]+")
     sys.exit(1)
 
 AUTHFILE = '.auth'
+PASSWDFILE = '.login'
 loginfail = True
 count = 0
-LOGIN_ID='line_id@gmail.com'
-LOGIN_PASSWORD='PaSSW0rD'
 
-while count < 3:
+# read id and password from .login
+if os.path.isfile(PASSWDFILE):
+    with open(PASSWDFILE, 'r') as f:
+        LOGIN_ID, LOGIN_PASSWORD = f.read().splitlines()
+else:
+    print(".login file doesn't exist!")
+    sys.exit(4)
+
+# try to login 3 times, save authentication token for reuse
+while loginfail and count < 3:
     count += 1
     if os.path.isfile(AUTHFILE):
         with open(AUTHFILE, 'r') as f:
@@ -34,7 +41,6 @@ while count < 3:
         try:
             client = LineClient(authToken=token)
             loginfail = False
-            break
         except:
             os.remove(AUTHFILE)
             print("login failed with token. Previous token removed.")
@@ -44,23 +50,34 @@ while count < 3:
             with open(AUTHFILE, 'w') as f:
                f.write(client.authToken)
             loginfail = False
-            break
         except:
             print("login failed with id and password")
 
 if loginfail:
     sys.exit(2)
 
-x=client.contacts[1]
+# find friend_name in contact list
+friend_name = sys.argv[1]
+friend_contact = None
+for i in xrange(1, len(client.contacts)):
+    if client.contacts[i].name == friend_name:
+        friend_contact = client.contacts[i]
+        break
 
-for i in xrange(1, arglen, 2):
+if friend_contact == None:
+    print("friend_name %s not found!" % friend_name)
+    sys.exit(5)
+
+# send message
+for i in xrange(2, arglen, 2):
     msgtype = sys.argv[i]
     if msgtype == 'text':
-        x.sendMessage(sys.argv[i+1])
+        friend_contact.sendMessage(sys.argv[i+1])
     elif msgtype == 'image':
-        x.sendImage(sys.argv[i+1])
+        friend_contact.sendImage(sys.argv[i+1])
     else:
         print("error argument!")
         sys.exit(3)
 
-x.getRecentMessages(count=10)
+# flush outgoing message (and clear incoming message)
+friend_contact.getRecentMessages(count=10)
